@@ -1,7 +1,6 @@
-# predicting-student-adaptability-level-in-online-education
+# predicting diabetes with logistic regression
 
+### dataset source:  
+Diabetes Healthcare: Comprehensive Dataset-AI https://www.kaggle.com/datasets/deependraverma13/diabetes-healthcare-comprehensive-dataset 
 
-dataset source: https://www.kaggle.com/datasets/mdmahmudulhasansuzan/students-adaptability-level-in-online-education 
-
-### Acknowledgement
-Thanks to the dataset from Students' Adaptability Level Prediction in Online Education using Machine Learning Approaches. DOI: 10.1109/ICCCNT51525.2021.9579741
+ 
