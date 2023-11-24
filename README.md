@@ -4,4 +4,4 @@ The dataset used in this project is originally from National Institute of Diabet
 ### Dataset source:  
 Diabetes Healthcare: Comprehensive Dataset-AI: https://www.kaggle.com/datasets/deependraverma13/diabetes-healthcare-comprehensive-dataset 
 ### Reference
-Gelman, A., Hill, J., & Vehtari, A. (2020). Regression and other stories. Cambridge University Press.
+Gelman, A., Hill, J., & Vehtari, A. (2020). *Regression and other stories*. Cambridge University Press.
