@@ -4,5 +4,6 @@ The dataset used in this project is originally from National Institute of Diabet
 The R code in this project for data visualization and logistic regression was written in R Markdown and knitted to html.
 ### Dataset source
 Diabetes Healthcare: Comprehensive Dataset-AI: https://www.kaggle.com/datasets/deependraverma13/diabetes-healthcare-comprehensive-dataset 
+https://www.kaggle.com/datasets/brenda89/fifa-world-cup-2022/ 
 ### Reference
 Gelman, A., Hill, J., & Vehtari, A. (2020). *Regression and other stories*. Cambridge University Press.
