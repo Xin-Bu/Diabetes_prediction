@@ -1,0 +1,340 @@
+---
+title: "Diabetes prediction"
+author: "Xin Bu"
+date: "2023-11-15"
+output: html_document
+html_document:
+    toc: true
+    toc_depth: 6
+    number_sections: true
+    toc_float: true
+    code_folding: hide
+    theme: flatly
+    code_download: true
+---
+-------------
+
+### Introduction
+
+The dataset used in this project is originally from National Institute of Diabetes and Digestive and Kidney Diseases (NIDDK). This project aims at building a logistic regression model to predict diabetes, based on certain diagnostic measurements. The predictors are BMI, insulin level, age, pregnancies, glucose plasma, blood pressure, skin thickness, and diabetes pedigree function. The outcome variable is a binary one indicating whether or not the patients have diabetes.The resampling method Monte Carlo simulation is used to cross-validate the model. 
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(dplyr)
+library(ggcorrplot)
+library(pROC)
+library(naniar)
+library(knitr)
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### Load data
+```{r}
+db <- read_csv("health care diabetes.csv") 
+head(db)
+```
+#### Check the vlaue of the two levels of the binary outcome variable
+```{r}
+unique(db$Outcome)
+```
+
+#### Visually check if the data have any missing values
+```{r}
+vis_miss(db)
+```
+
+### Correlation
+#### Detect correlations between the variables
+```{r}
+correlation <- cor(db[,1:9])
+ggcorrplot(correlation,
+           hc.order = TRUE,
+           type = "lower",
+           outline.color = "white",
+           ggtheme = ggplot2::theme_gray,
+           colors = c("#6D9EC1","white","#E46726"),
+           lab = TRUE)
+```
+
+#### Pairwise correlation
+```{r}
+pairs(db,
+      cex.labels = 0.8,
+        col = c("#E46726","#6D9EC1"),
+        pch = 21,
+        main = "Pairwise Correlation")
+
+```
+
+
+#### Split the data to train and test the model
+```{r}
+set.seed(11162023)
+
+train_indices <- sample(1:nrow(db), 0.7*nrow(db))
+train_data <- db[train_indices,]
+test_data <- db[-train_indices,]
+
+
+```
+
+#### Train the logistic regression model
+```{r}
+
+model <- glm(Outcome ~ ., family = binomial, data=train_data)
+summary(model)
+
+```
+#### Remove the variable Bloodpressure to see if there are any differences
+```{r}
+
+model_2 <- glm(Outcome ~ ., family = binomial, data=train_data[-3])
+summary(model_2)
+
+```
+
+
+#### Optimize the model using Akaike Information Criterion (AIC). The step() function found the most efficient model with the lowest AIC. 
+```{r}
+aic_model <- step(model)
+summary(aic_model)
+
+```
+
+
+#### According to the AIC score, the variable Skinthickness should be excluded to make an efficient model. Test the data and calculate the accuracy of the AIC model.
+```{r}
+
+predictions <- predict(aic_model, 
+                       type = "response",
+                       newdata = test_data[-4])
+
+predicted_db <- ifelse(predictions > 0.5, 1, 0)
+
+actual_db <- test_data$Outcome
+
+accuracy <- mean(predicted_db == actual_db)
+accuracy <- round(accuracy*100,2)
+print(accuracy)
+coefficients <- coef(aic_model)
+print(coefficients)
+print(predicted_db)
+print(actual_db) 
+```
+
+### Cross-validation of the model
+#### Monte Carlo Simulation
+```{r}
+db_1 <- subset(db, select = -c(SkinThickness))
+
+lg <- replicate(100, {
+  index <- sample(1:nrow(db), 0.7*nrow(db_1))
+  train_data <- db_1%>% slice(index)
+  test_data <- db_1%>% slice(-index)
+  model <- glm(Outcome~.,
+               family = binomial,
+               data=train_data)
+  predicted_db_1 <- predict(model,
+                          type = "response",
+                          newdata= test_data)
+  predicted_classes <- ifelse(predicted_db_1 > 0.5, 1,0)
+  corrected_predictions <- sum(predicted_classes == test_data$Outcome)
+  total_predictions <- length(predicted_classes)
+  accuracy <- corrected_predictions/total_predictions
+  return(accuracy)
+})
+paste("Cross-validated accuracy of the model:", round(mean(lg),4)*100)
+```
+
+### Visualize the data
+#### Pregnancies plot
+```{r}
+
+ggplot() + 
+  geom_point(aes(db_1$Pregnancies, db_1$Outcome)) + 
+  geom_smooth(aes(db_1$Pregnancies, db_1$Outcome),
+              method = "glm", se = FALSE, method.args = list(family = "binomial"), 
+              color = "blue", linewidth = 1.2)+
+  ggtitle("Diabetes Diagnosis from Pregnancies") +
+  ylab("Diabetes Diagnosis") +
+  xlab("Pregnancies") +
+scale_y_continuous(breaks = c(0, 1), labels = c("No", "Yes")) +
+  theme(plot.title = element_text(size = 20, face="bold",
+                                 margin = margin(10,0,10,0)),
+       plot.background = element_rect(fill = "#E46726"),
+       panel.background = element_rect(fill = "#6D9EC1"),
+       axis.text.x = element_text(size = 12),
+       axis.title.x = element_text(size = 15, margin = margin(11,0,10,0)),
+       axis.text.y = element_text(size = 12),
+       axis.title.y = element_text(size = 15, margin=margin(0,10,0,11)),
+       panel.grid.major = element_blank(),
+       panel.grid.minor = element_blank(),
+       plot.margin = margin(0,0.5,0,0, "cm"))
+
+
+```
+
+
+#### Glucose plot
+```{r}
+
+ggplot() + 
+  geom_point(aes(db_1$Glucose, db_1$Outcome)) + 
+  geom_smooth(aes(db_1$Glucose, db_1$Outcome),
+              method = "glm", se = FALSE, method.args = list(family = "binomial"), 
+              color = "blue", linewidth = 1.2) +
+  ggtitle("Diabetes Diagnosis from Glucose") +
+  ylab("Diabetes Diagnosis") +
+  xlab("Glucose") +
+scale_y_continuous(breaks = c(0, 1), labels = c("No", "Yes")) +
+  theme(plot.title = element_text(size = 20, face="bold",
+                                 margin = margin(10,0,10,0)),
+       plot.background = element_rect(fill = "#E46726"),
+       panel.background = element_rect(fill = "#6D9EC1"),
+       axis.text.x = element_text(size = 12),
+       axis.title.x = element_text(size = 15, margin = margin(11,0,10,0)),
+       axis.text.y = element_text(size = 12),
+       axis.title.y = element_text(size = 15, margin=margin(0,10,0,11)),
+       panel.grid.major = element_blank(),
+       panel.grid.minor = element_blank(),
+       plot.margin = margin(0,0.5,0,0, "cm"))
+
+```
+
+
+
+#### BloodPressure plot
+```{r}
+
+ggplot() + 
+  geom_point(aes(db_1$BloodPressure, db_1$Outcome)) + 
+  geom_smooth(aes(db_1$BloodPressure, db_1$Outcome),
+              method = "glm", se = FALSE, method.args = list(family = "binomial"), 
+              color = "blue", linewidth = 1.2) +
+  ggtitle("Diabetes Diagnosis from BloodPressure") +
+  ylab("Diabetes Diagnosis") +
+  xlab("BloodPressure") +
+scale_y_continuous(breaks = c(0, 1), labels = c("No", "Yes")) +
+  theme(plot.title = element_text(size = 20, face="bold",
+                                 margin = margin(10,0,10,0)),
+       plot.background = element_rect(fill = "#E46726"),
+       panel.background = element_rect(fill = "#6D9EC1"),
+       axis.text.x = element_text(size = 12),
+       axis.title.x = element_text(size = 15, margin = margin(11,0,10,0)),
+       axis.text.y = element_text(size = 12),
+       axis.title.y = element_text(size = 15, margin=margin(0,10,0,11)),
+       panel.grid.major = element_blank(),
+       panel.grid.minor = element_blank(),
+       plot.margin = margin(0,0.5,0,0, "cm"))
+
+```
+
+#### Insulin plot
+```{r}
+
+ggplot() + 
+  geom_point(aes(db_1$Insulin, db_1$Outcome)) + 
+  geom_smooth(aes(db_1$Insulin, db_1$Outcome),
+              method = "glm", se = FALSE, method.args = list(family = "binomial"), 
+              color = "blue", linewidth = 1.2) +
+  ggtitle("Diabetes Diagnosis from Insulin") +
+  ylab("Diabetes Diagnosis") +
+  xlab("Insulin") +
+scale_y_continuous(breaks = c(0, 1), labels = c("No", "Yes")) +
+  theme(plot.title = element_text(size = 20, face="bold",
+                                 margin = margin(10,0,10,0)),
+       plot.background = element_rect(fill = "#E46726"),
+       panel.background = element_rect(fill = "#6D9EC1"),
+       axis.text.x = element_text(size = 12),
+       axis.title.x = element_text(size = 15, margin = margin(11,0,10,0)),
+       axis.text.y = element_text(size = 12),
+       axis.title.y = element_text(size = 15, margin=margin(0,10,0,11)),
+       panel.grid.major = element_blank(),
+       panel.grid.minor = element_blank(),
+       plot.margin = margin(0,0.5,0,0, "cm"))
+
+```
+
+
+#### BMI plot
+```{r}
+
+ggplot() + 
+  geom_point(aes(db_1$BMI, db_1$Outcome)) + 
+  geom_smooth(aes(db_1$BMI, db_1$Outcome),
+              method = "glm", se = FALSE, method.args = list(family = "binomial"), 
+              color = "blue", linewidth = 1.2) +
+  ggtitle("Diabetes Diagnosis from BMI") +
+  ylab("Diabetes Diagnosis") +
+  xlab("BMI") +
+scale_y_continuous(breaks = c(0, 1), labels = c("No", "Yes")) +
+  theme(plot.title = element_text(size = 20, face="bold",
+                                 margin = margin(10,0,10,0)),
+       plot.background = element_rect(fill = "#E46726"),
+       panel.background = element_rect(fill = "#6D9EC1"),
+       axis.text.x = element_text(size = 12),
+       axis.title.x = element_text(size = 15, margin = margin(11,0,10,0)),
+       axis.text.y = element_text(size = 12),
+       axis.title.y = element_text(size = 15, margin=margin(0,10,0,11)),
+       panel.grid.major = element_blank(),
+       panel.grid.minor = element_blank(),
+       plot.margin = margin(0,0.5,0,0, "cm"))
+
+```
+
+
+#### DiabetesPedigreeFunction plot
+```{r}
+
+ggplot() + 
+  geom_point(aes(db_1$DiabetesPedigreeFunction, db_1$Outcome)) + 
+  geom_smooth(aes(db_1$DiabetesPedigreeFunction, db_1$Outcome),
+              method = "glm", se = FALSE, method.args = list(family = "binomial"), 
+              color = "blue", linewidth = 1.2) +
+  ggtitle("Diabetes Diagnosis from DiabetesPedigreeFunction") +
+  ylab("Diabetes Diagnosis") +
+  xlab("DiabetesPedigreeFunction") +
+scale_y_continuous(breaks = c(0, 1), labels = c("No", "Yes")) +
+  theme(plot.title = element_text(size = 18, face="bold",
+                                 margin = margin(10,0,10,0)),
+       plot.background = element_rect(fill = "#E46726"),
+       panel.background = element_rect(fill = "#6D9EC1"),
+       axis.text.x = element_text(size = 12),
+       axis.title.x = element_text(size = 15, margin = margin(11,0,10,0)),
+       axis.text.y = element_text(size = 12),
+       axis.title.y = element_text(size = 15, margin=margin(0,10,0,11)),
+       panel.grid.major = element_blank(),
+       panel.grid.minor = element_blank(),
+       plot.margin = margin(0,0.5,0,0, "cm"))
+
+```
+
+
+#### Age plot
+```{r}
+
+ggplot() + 
+  geom_point(aes(db_1$Age, db_1$Outcome)) + 
+  geom_smooth(aes(db_1$Age, db_1$Outcome),
+              method = "glm", se = FALSE, method.args = list(family = "binomial"), 
+              color = "blue", linewidth = 1.2) +
+  ggtitle("Diabetes Diagnosis from Age") +
+  ylab("Diabetes Diagnosis") +
+  xlab("Age") +
+scale_y_continuous(breaks = c(0, 1), labels = c("No", "Yes")) +
+  theme(plot.title = element_text(size = 20, face="bold",
+                                 margin = margin(10,0,10,0)),
+       plot.background = element_rect(fill = "#E46726"),
+       panel.background = element_rect(fill = "#6D9EC1"),
+       axis.text.x = element_text(size = 12),
+       axis.title.x = element_text(size = 15, margin = margin(11,0,10,0)),
+       axis.text.y = element_text(size = 12),
+       axis.title.y = element_text(size = 15, margin=margin(0,10,0,11)),
+       panel.grid.major = element_blank(),
+       panel.grid.minor = element_blank(),
+       plot.margin = margin(0,0.5,0,0, "cm"))
+
+```
+
+
