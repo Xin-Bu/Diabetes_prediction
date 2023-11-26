@@ -1,6 +1,6 @@
 ## Predicting diabetes
 ### Dataset
-The dataset used in this project is originally from National Institute of Diabetes and Digestive and Kidney Diseases (NIDDK). This project aims at building a logsitic regression model to predict diabetes, based on certain diagnostic measurements used as predictors, which include BMI, insulin level, age, pregnancies, glucose plasma, blood pressure, skin thickness, and diabetes pedigree function. The outcome variable is a binary one indicating whether or not the pateients have diabetes.
+The dataset used in this project is originally from National Institute of Diabetes and Digestive and Kidney Diseases (NIDDK). This project aims at building a logistic regression model to predict diabetes, based on certain diagnostic measurements used as predictors, including BMI, insulin level, age, pregnancies, glucose plasma, blood pressure, skin thickness, and diabetes pedigree function. The outcome variable is a binary one indicating whether or not the patients have diabetes. The resampling method Monte Carlo simulation was used to cross-validate the model.
 
 The R code in this project for data visualization and logistic regression was written in R Markdown and knitted to html.
 #### Variable description
