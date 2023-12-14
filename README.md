@@ -14,7 +14,7 @@ The R code in this project for data visualization and logistic regression was wr
 * Age: Age in years
 * Outcome: Whether or not the patients have diabetes. 0 for no and 1 for yes. 
 ### Dataset source
-Diabetes Healthcare: Comprehensive Dataset-AI https://www.kaggle.com/datasets/deependraverma13/diabetes-healthcare-comprehensive-dataset 
+[Diabetes Healthcare: Comprehensive Dataset-AI](https://www.kaggle.com/datasets/deependraverma13/diabetes-healthcare-comprehensive-dataset) 
 ### References
 * Gelman, A., Hill, J., & Vehtari, A. (2020). *Regression and other stories*. Cambridge University Press.
 * Kuhn, M., & Silge, J. (2022). *Tidy modeling with R*. " O'Reilly Media, Inc.".
