@@ -4,17 +4,17 @@ The dataset used in this project is originally from the National Institute of Di
 
 The R code in this project for data visualization and logistic regression was written in R Markdown and knitted to html.
 #### Variable description
-* Preganancies: Number of times pregnant
-* Glucose: Plasma glucose concentration in an oral glucose tolerance test
-* BloodPressure: Diastolic blood pressure (mm Hg)
-* SkinThickness: Triceps skinfold thickness(mm)
-* Insulin: Two hour serum insulin
-* BMI: Body Mass Index
-* DiabetesPedigreeFunction: Diabetes pedigree function
-* Age: Age in years
-* Outcome: Whether or not the patients have diabetes. 0 for no and 1 for yes. 
-### Dataset source
+* `Preganancies`: Number of times pregnant
+* `Glucose`: Plasma glucose concentration in an oral glucose tolerance test
+* `BloodPressure`: Diastolic blood pressure (mm Hg)
+* `SkinThickness`: Triceps skinfold thickness(mm)
+* `Insulin`: Two hour serum insulin
+* `BMI`: Body Mass Index
+* `DiabetesPedigreeFunction`: Diabetes pedigree function
+* `Age`: Age in years
+* `Outcome`: Whether or not the patients have diabetes. 0 for no and 1 for yes. 
+### Data source
 [Diabetes Healthcare: Comprehensive Dataset-AI](https://www.kaggle.com/datasets/deependraverma13/diabetes-healthcare-comprehensive-dataset) 
 ### References
 * Gelman, A., Hill, J., & Vehtari, A. (2020). *Regression and other stories*. Cambridge University Press.
-* Kuhn, M., & Silge, J. (2022). *Tidy modeling with R*. " O'Reilly Media, Inc.".
+* Kuhn, M., & Silge, J. (2022). *Tidy modeling with R*. O'Reilly Media, Inc.
